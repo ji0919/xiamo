@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    手机号:<input type="text" class="username"/> 
+    密码:<input type="text" class="pass"/>
+    <button>注册</button>
+</body>
+<script src="./jquery.js"></script>
+<script>
+    $("button").on("click",function(){
+        $.get("http://localhost:8080/register",{
+            username:$(".username").val(),
+            password:$(".pass").val()
+        },function(res){
+            console.log(res);
+            if(res=="注册成功"){
+                window.location.href="./login.html"
+            }
+            if(res.status==false){
+                alert(res.msg)
+                // window.location.href="./login.html"
+            }
+        })
+    })
+</script>
+</html>
