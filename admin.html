@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <script src="./jquery.js"></script>
+<script src="./bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="float: left;margin-left: 50px;">增加按钮</button>
+    <div class="row">
+        <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>姓名</th>
+                <th>年龄</th>
+                <th>性别</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- <tr>
+                <td>1</td>
+                <td>shao</td>
+                <td>2968687993@qq.com</td>
+                <td>15552147766</td>
+                <td>
+                    <span class="glyphicon glyphicon-pencil"></span>
+                    <span class="glyphicon glyphicon-trash"></span>
+                </td>
+              </tr> -->
+            </tbody>
+        </table>
+    </div>
+     <!-- 增加的模态框 -->
+     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">添加用户</h4>
+                </div>
+                <div class="modal-body">
+                    用户名: <input type="text" class="username"><br/><br/>
+                    年龄:&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" class="age"><br/><br/>
+                    性别:&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" class="sex"><br/><br/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="confirm">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 修改的模态框 -->
+    <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">修改用户信息</h4>
+                </div>
+                <div class="modal-body">
+                    用户名: <input type="text" class="username1" disabled><br/><br/>
+                    年龄:&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" class="age1"><br/><br/>
+                    性别:&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" class="sex1">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" id="confirm1">确定修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    //提交按钮
+    $("#confirme").on("click",function(){
+        $("#confirm").attr("data-dismiss","modal")
+        $.get("http://localhost:8000/att",{
+            username:$(".username").val(),
+            sex:$(".sex").val(),
+            age:$(".age").val(),
+        },function(res){
+            console.log(res)
+            if(res.status==1){
+                show()
+            }
+        })
+    })
+    //渲染函数
+    function show(){
+        $("tbody").empty()
+        $.post("http://localhost:8000/show",{},function(res){
+            res.forEach(item=>{
+                $("<tr>").html(`
+                        <td>${item.id}</td>
+                        <td>${item.username}</td>
+                        <td>${item.sex}</td>
+                        <td>${item.age}</td>
+                        <td>
+                            <span class="glyphicon glyphicon-pencil update" id=${item._id} data-toggle="modal" data-target="#myModal1" onclick='edit(this)'></span>
+                            <span class="glyphicon glyphicon-trash" id=${item._id} onclick='del(this)'></span>
+                        </td>
+                    `).appendTo($("tbody"))
+            })
+        })
+    }
+    show()
+    //删除
+    function del(ele){
+        let id=$(ele).attr("id")
+        $.post("http://localhost:8000/del",{id},function(res){
+            res.status==1?show():null
+        })
+    }
+    //修改
+    function edit(ele){
+        let id=$(ele).attr("id")
+        localStorage.setItem("id",id)
+        $.get("http://localhost:8000/edit",{
+            id
+        },function(res){
+            console.log(res)
+            $(".username1").val(res[0].username)
+            $(".age1").val(res[0].age)
+            $(".sex1").val(res[0].sex)
+        })
+    }
+        // 确认修改
+        $("#confirm1").on("click",function(){
+        let id=localStorage.getItem("id");
+        let email=$(".age1").val()
+        let phone=$(".sex1").val()
+        $.ajax({
+            type:'get',
+            url:'http://localhost:8080/confirmedit',
+            data:{
+                id,email,phone
+            },
+            success(res){
+                res.status==1?show():null;
+            }
+        })
+    })
+</script>
+</html>
